@@ -4,6 +4,7 @@ require 'smart_listing/helper'
 module SmartListing::Helper
   class UsersController < ApplicationController
     include ControllerExtensions
+    attr_writer :user
 
     attr_accessor :smart_listings
 
@@ -71,6 +72,16 @@ module SmartListing::Helper
       it 'give the controller name' do
         controller = UsersController.new
         expect(controller.smart_listing_resource_name).to eq :users
+      end
+    end
+
+    describe '#smart_listing_resource' do
+      it 'give the resource' do
+        controller = UsersController.new
+        user = double
+        controller.user = user
+
+        expect(controller.smart_listing_resource).to eq user
       end
     end
   end

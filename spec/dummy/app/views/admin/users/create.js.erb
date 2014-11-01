@@ -1,2 +1,2 @@
-<%= smart_listing_item :create, @user,
-                       @user.valid? ? "admin/users/user" : "admin/users/form" %>
+<%= smart_listing_item :create, smart_listing_resource,
+                       smart_listing_resource.valid? ? "admin/users/user" : "admin/users/form" %>

@@ -3,7 +3,8 @@ module SmartListing
     module ControllerExtensions
       def self.included(c)
         return unless c < ActionController::Base
-        c.helper_method :smart_listing_resource_name
+        c.helper_method :smart_listing_resource_name,
+          :smart_listing_resource
       end
 
       def smart_listing_create collection, options = {}
@@ -24,6 +25,14 @@ module SmartListing
 
       def smart_listing_resource_name
         controller_name.to_sym
+      end
+
+      def smart_listing_resource
+        instance_variable_get("@#{smart_listing_singular_resource_name}")
+      end
+
+      def smart_listing_singular_resource_name
+        smart_listing_resource_name.to_s.singularize.to_sym
       end
     end
 
