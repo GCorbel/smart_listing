@@ -1,8 +1,13 @@
 module SmartListing
   module Helper
     module ControllerExtensions
-      def smart_listing_create name, collection, options = {}
-        name = name.to_sym
+      def self.included(c)
+        return unless c < ActionController::Base
+        c.helper_method :smart_listing_resource_name
+      end
+
+      def smart_listing_create collection, options = {}
+        name = smart_listing_resource_name
 
         list = SmartListing::Base.new(name, collection, options)
         list.setup(params, cookies)
@@ -13,8 +18,12 @@ module SmartListing
         list.collection
       end
 
-      def smart_listing name
-        @smart_listings[name.to_sym]
+      def smart_listing
+        @smart_listings[smart_listing_resource_name]
+      end
+
+      def smart_listing_resource_name
+        controller_name.to_sym
       end
     end
 
@@ -55,7 +64,7 @@ module SmartListing
         per_page_sizes.push(0) if @smart_listing.unlimited_per_page?
 
         locals = {
-          :container_classes => container_classes, 
+          :container_classes => container_classes,
           :per_page_sizes => per_page_sizes,
         }
 
@@ -68,7 +77,7 @@ module SmartListing
         end
 
         locals = {
-          :page => page, 
+          :page => page,
           :url => url,
         }
 
@@ -77,7 +86,7 @@ module SmartListing
 
       def sortable title, attribute, options = {}
         dirs = options[:sort_dirs] || @smart_listing.sort_dirs || [nil, "asc", "desc"]
-        
+
         next_index = dirs.index(@smart_listing.sort_order(attribute)).nil? ? 0 : (dirs.index(@smart_listing.sort_order(attribute)) + 1) % dirs.length
 
         sort_params = {
@@ -176,9 +185,9 @@ module SmartListing
     end
 
     # Outputs smart list container
-    def smart_listing_for name, *args, &block
+    def smart_listing_for *args, &block
       raise ArgumentError, "Missing block" unless block_given?
-      name = name.to_sym
+      name = smart_listing_resource_name
       options = args.extract_options!
       bare = options.delete(:bare)
 
@@ -207,13 +216,14 @@ module SmartListing
       output
     end
 
-    def smart_listing_render name, *args
-      smart_listing_for(name, *args) do |smart_listing|
+    def smart_listing_render *args
+      smart_listing_for(smart_listing_resource_name, *args) do |smart_listing|
         concat(smart_listing.render_list)
       end
     end
 
-    def smart_listing_controls_for name, *args, &block
+    def smart_listing_controls_for *args, &block
+      name = smart_listing_resource_name
       smart_listing = @smart_listings.try(:[], name)
 
       classes = [SmartListing.config.classes(:controls), args.first.try(:[], :class)]
@@ -233,7 +243,7 @@ module SmartListing
           next unless action.is_a?(Hash)
 
           locals = {
-            :action_if => action.has_key?(:if) ? action[:if] : true, 
+            :action_if => action.has_key?(:if) ? action[:if] : true,
             :url => action.delete(:url),
             :icon => action.delete(:icon),
             :title => action.delete(:title),
@@ -245,29 +255,29 @@ module SmartListing
           case action_name
           when :show
             locals[:icon] ||= SmartListing.config.classes(:icon_show)
-						template = 'action_show'
+            template = 'action_show'
           when :edit
             locals[:icon] ||= SmartListing.config.classes(:icon_edit)
-						template = 'action_edit'
+            template = 'action_edit'
           when :destroy
             locals[:icon] ||= SmartListing.config.classes(:icon_trash)
             locals.merge!(
               :confirmation => action.delete(:confirmation),
             )
-						template = 'action_delete'
+            template = 'action_delete'
           when :custom
             locals.merge!(
               :html_options => action,
             )
-						template = 'action_custom'
+            template = 'action_custom'
           end
 
           locals[:icon] = [locals[:icon], SmartListing.config.classes(:muted)] if !locals[:action_if]
 
           if template
-						concat(render(:partial => "smart_listing/#{template}", :locals => locals))
+            concat(render(:partial => "smart_listing/#{template}", :locals => locals))
           else
-						concat(render(:partial => "smart_listing/action_#{action_name}", :locals => {:action => action}))
+            concat(render(:partial => "smart_listing/action_#{action_name}", :locals => {:action => action}))
           end
         end
       end
@@ -284,20 +294,19 @@ module SmartListing
     # JS helpers:
 
     # Updates the smart list
-    def smart_listing_update name, options = {}
-      name = name.to_sym
-      smart_listing = @smart_listings[name]
+    def smart_listing_update options = {}
+      smart_listing = @smart_listings[smart_listing_resource_name]
 
       # don't update list if params are missing (prevents interfering with other lists)
       if params.keys.select{|k| k.include?("smart_listing")}.any? && !params[smart_listing.base_param]
         return unless options[:force]
       end
 
-      builder = Builder.new(name, smart_listing, self, {}, nil)
+      builder = Builder.new(smart_listing_resource_name, smart_listing, self, {}, nil)
       render(:partial => 'smart_listing/update_list', :locals => {
-        :name => smart_listing.name, 
-        :part => smart_listing.partial, 
-        :smart_listing => builder, 
+        :name => smart_listing.name,
+        :part => smart_listing.partial,
+        :smart_listing => builder,
         :smart_listing_data => {
           SmartListing.config.data_attributes(:params) => smart_listing.all_params,
           SmartListing.config.data_attributes(:max_count) => smart_listing.max_count,
@@ -307,8 +316,8 @@ module SmartListing
     end
 
     # Renders single item (i.e for create, update actions)
-    def smart_listing_item name, item_action, object = nil, partial = nil, options = {}
-      name = name.to_sym
+    def smart_listing_item item_action, object = nil, partial = nil, options = {}
+      name = smart_listing_resource_name
       type = object.class.name.downcase.to_sym if object
       id = options[:id] || object.try(:id)
       valid = options[:valid] if options.has_key?(:valid)

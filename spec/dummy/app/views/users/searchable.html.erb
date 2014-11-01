@@ -1,4 +1,4 @@
-<%= smart_listing_controls_for(:users, {class: 'form-inline text-right'}) do %>
+<%= smart_listing_controls_for({class: 'form-inline text-right'}) do %>
   <div class="form-group filter input-append">
     <%= text_field_tag :filter, '',
       class: 'search form-control', placeholder: 'Search...',
@@ -8,5 +8,5 @@
     <span class='glyphicon glyphicon-search'></span>
   </button>
 <% end %>
-<%= smart_listing_render :users %>
+<%= smart_listing_render %>
 
