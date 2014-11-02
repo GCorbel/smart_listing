@@ -3,13 +3,16 @@ class UsersController < ApplicationController
   helper  SmartListing::Helper
 
   def index
-    smart_listing_create User.all, partial: 'users/list'
+    smart_listing_create User.all, partial: 'admin/users/list'
+    respond_to do |format|
+      format.html
+      format.js { render formats: :js }
+    end
   end
 
   def sortable
     smart_listing_create User.all, partial: 'users/sortable_list',
       default_sort: { name: 'desc' }
-    render 'index'
   end
 
   def searchable

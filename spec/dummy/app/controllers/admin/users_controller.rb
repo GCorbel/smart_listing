@@ -6,6 +6,10 @@ class Admin::UsersController < ApplicationController
 
   def index
     smart_listing_create User.all, partial: "admin/users/list"
+    respond_to do |format|
+      format.html { render formats: :html }
+      format.js { render formats: :js }
+    end
   end
 
   def new

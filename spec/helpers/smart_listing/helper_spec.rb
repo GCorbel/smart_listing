@@ -84,5 +84,26 @@ module SmartListing::Helper
         expect(controller.smart_listing_resource).to eq user
       end
     end
+
+    describe '#smart_listing_view_path' do
+      it 'give the view path' do
+        controller = UsersController.new
+        expect(controller.smart_listing_view_path).to eq 'smart_listing/helper/users'
+      end
+    end
+
+    describe '#smart_listing_view_item_path' do
+      it 'give the path the view item template' do
+        controller = UsersController.new
+        expect(controller.smart_listing_view_item_path).to eq 'smart_listing/helper/users/user'
+      end
+    end
+
+    describe '#smart_listing_view_form_path' do
+      it 'give the path the view form template' do
+        controller = UsersController.new
+        expect(controller.smart_listing_view_form_path).to eq 'smart_listing/helper/users/form'
+      end
+    end
   end
 end
