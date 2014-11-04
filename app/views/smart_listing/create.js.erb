@@ -1,2 +1,2 @@
-<%= smart_listing_item :create, smart_listing_resource,
-                       smart_listing_resource.valid? ? smart_listing_view_item_path : smart_listing_view_form_path %>
+<%= smart_listing_item :create, smart_listing_presenter.resource,
+                       smart_listing_presenter.resource.valid? ? smart_listing_presenter.view_item_path : smart_listing_presenter.view_form_path %>

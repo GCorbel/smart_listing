@@ -3,17 +3,19 @@ module SmartListing
     module ControllerExtensions
       def self.included(c)
         return unless c < ActionController::Base
-        c.helper_method :smart_listing_resource_name,
-          :smart_listing_resource, :smart_listing_view_item_path,
-          :smart_listing_view_form_path
+        c.helper_method :smart_listing_presenter
       end
 
       def _prefixes
         super << 'smart_listing'
       end
 
+      def smart_listing_presenter
+        SmartListingPresenter.new(self)
+      end
+
       def smart_listing_create collection, options = {}
-        name = smart_listing_resource_name
+        name = smart_listing_presenter.resource_name
 
         list = SmartListing::Base.new(name, collection, options)
         list.setup(params, cookies)
@@ -25,31 +27,7 @@ module SmartListing
       end
 
       def smart_listing
-        @smart_listings[smart_listing_resource_name]
-      end
-
-      def smart_listing_resource_name
-        controller_name.to_sym
-      end
-
-      def smart_listing_resource
-        instance_variable_get("@#{smart_listing_singular_resource_name}")
-      end
-
-      def smart_listing_singular_resource_name
-        smart_listing_resource_name.to_s.singularize.to_sym
-      end
-
-      def smart_listing_view_path
-        controller_path
-      end
-
-      def smart_listing_view_item_path
-        "#{controller_path}/#{smart_listing_singular_resource_name}"
-      end
-
-      def smart_listing_view_form_path
-        "#{controller_path}/form"
+        @smart_listings[smart_listing_presenter.resource_name]
       end
     end
 
@@ -213,7 +191,7 @@ module SmartListing
     # Outputs smart list container
     def smart_listing_for *args, &block
       raise ArgumentError, "Missing block" unless block_given?
-      name = smart_listing_resource_name
+      name = smart_listing_presenter.resource_name
       options = args.extract_options!
       bare = options.delete(:bare)
 
@@ -243,13 +221,13 @@ module SmartListing
     end
 
     def smart_listing_render *args
-      smart_listing_for(smart_listing_resource_name, *args) do |smart_listing|
+      smart_listing_for(smart_listing_presenter.resource_name, *args) do |smart_listing|
         concat(smart_listing.render_list)
       end
     end
 
     def smart_listing_controls_for *args, &block
-      name = smart_listing_resource_name
+      name = smart_listing_presenter.resource_name
       smart_listing = @smart_listings.try(:[], name)
 
       classes = [SmartListing.config.classes(:controls), args.first.try(:[], :class)]
@@ -321,14 +299,14 @@ module SmartListing
 
     # Updates the smart list
     def smart_listing_update options = {}
-      smart_listing = @smart_listings[smart_listing_resource_name]
+      smart_listing = @smart_listings[smart_listing_presenter.resource_name]
 
       # don't update list if params are missing (prevents interfering with other lists)
       if params.keys.select{|k| k.include?("smart_listing")}.any? && !params[smart_listing.base_param]
         return unless options[:force]
       end
 
-      builder = Builder.new(smart_listing_resource_name, smart_listing, self, {}, nil)
+      builder = Builder.new(smart_listing_presenter.resource_name, smart_listing, self, {}, nil)
       render(:partial => 'smart_listing/update_list', :locals => {
         :name => smart_listing.name,
         :part => smart_listing.partial,
@@ -343,7 +321,7 @@ module SmartListing
 
     # Renders single item (i.e for create, update actions)
     def smart_listing_item item_action, object = nil, partial = nil, options = {}
-      name = smart_listing_resource_name
+      name = smart_listing_presenter.resource_name
       type = object.class.name.downcase.to_sym if object
       id = options[:id] || object.try(:id)
       valid = options[:valid] if options.has_key?(:valid)
