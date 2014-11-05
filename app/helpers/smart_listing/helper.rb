@@ -14,8 +14,9 @@ module SmartListing
         SmartListingPresenter.new(self)
       end
 
-      def smart_listing_create collection, options = {}
+      def smart_listing_create options = {}
         name = smart_listing_presenter.resource_name
+        collection = options[:collection] || smart_listing_presenter.collection
 
         list = SmartListing::Base.new(name, collection, options)
         list.setup(params, cookies)

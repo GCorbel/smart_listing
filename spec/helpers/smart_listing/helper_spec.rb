@@ -25,7 +25,7 @@ module SmartListing::Helper
         expect(list).to receive(:setup).with(controller.params,
                                              controller.cookies)
 
-        controller.smart_listing_create(:users, collection)
+        controller.smart_listing_create
       end
 
       it "assign a list in smart listings with the name" do
@@ -33,7 +33,7 @@ module SmartListing::Helper
         collection = double
         list = build_list(collection: collection)
 
-        controller.smart_listing_create(:users, collection)
+        controller.smart_listing_create
 
         expect(controller.smart_listings[:users]).to eq list
       end
@@ -44,7 +44,7 @@ module SmartListing::Helper
         collection2 = double
         build_list(collection: collection1)
 
-        controller.smart_listing_create(:users, collection2)
+        controller.smart_listing_create(collection: collection2)
 
         actual = controller.smart_listings[:users].collection
         expect(actual).to eq collection1

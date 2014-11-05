@@ -7,6 +7,14 @@ class SmartListingPresenter
     @controller = controller
   end
 
+  def collection
+    base_class.all
+  end
+
+  def base_class
+    controller_name.classify.constantize
+  end
+
   def resource_name
     controller_name.to_sym
   end
