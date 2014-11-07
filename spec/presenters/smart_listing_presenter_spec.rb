@@ -34,12 +34,6 @@ module SmartListing::Helper
       end
     end
 
-    describe '#view_form_path' do
-      it 'give the path the view form template' do
-        expect(presenter.view_form_path).to eq 'smart_listing/helper/users/form'
-      end
-    end
-
     def presenter
       @presenter ||= SmartListingPresenter.new(UsersController.new)
     end

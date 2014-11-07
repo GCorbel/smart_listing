@@ -31,10 +31,6 @@ class SmartListingPresenter
     "#{controller_path}/#{singular_resource_name}"
   end
 
-  def view_form_path
-    "#{controller_path}/form"
-  end
-
   def resource
     controller.instance_variable_get("@#{singular_resource_name}")
   end
