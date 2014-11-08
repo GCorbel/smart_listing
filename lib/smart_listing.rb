@@ -5,7 +5,7 @@ require 'smart_listing/config'
 require "smart_listing/engine"
 require "kaminari"
 
-# Fix parsing nester params
+# Fix parsing nested params
 module Kaminari
   module Helpers
     class Tag
