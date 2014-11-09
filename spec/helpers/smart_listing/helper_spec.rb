@@ -15,7 +15,7 @@ module SmartListing::Helper
       { value: 'cookies' }
     end
 
-    def resource
+    def smart_listing_collection
       [1, 2]
     end
   end
@@ -72,7 +72,8 @@ module SmartListing::Helper
           options = { }
           build_list(options)
 
-          expect(SmartListing::Base).to receive(:new).with(:users, controller.resource, options)
+          expect(SmartListing::Base).to receive(:new).
+            with(:users, controller.smart_listing_collection, options)
 
           controller.smart_listing_create(options)
         end
